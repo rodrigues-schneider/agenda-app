@@ -1,0 +1,9 @@
+expo
+expo-font
+@react-native-vector-icons/fontawesome
+react-navigation
+react-native-safe-area-context
+styled-components
+react-native-calendars
+
+

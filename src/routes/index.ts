@@ -1,0 +1,1 @@
+export {default as Routes} from './botton-tabs-routes.routes'
