@@ -1,17 +1,27 @@
 import { StyleSheet, Text, FlatList, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { colors, fonts } from "../constants/themes";
-
-const Categories = ["Tudo", "Trabalho", "Saúde", "Pessoal"]; //Receberá o Array real futuramente
+import { dbManager } from "../services";
 
 export default function CategoryFilter() {
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState("Todas");
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function loadCategories() {
+      const fetchCategories = await dbManager.getCategories();
+      setCategories(["Todas", ...fetchCategories]);
+    }
+    loadCategories();
+  }, []);
 
   return (
     <FlatList
-      style={{ flexDirection: "row", gap: 3 }}
-      data={Categories}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={{ paddingHorizontal: 8, gap: 4 }}
+      data={categories}
       keyExtractor={(item) => item.toString()}
       renderItem={({ item }) => (
         <TouchableOpacity

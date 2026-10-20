@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { fonts, colors } from "./src/constants/themes";
+import { dbManager } from "./src/services";
 
 import { Routes } from "./src/routes/";
 
@@ -15,6 +16,10 @@ export default function App() {
     [fonts.SEMIBOLD]: require("./src/assets/fonts/AsapSharp_Condensed-SemiBold.ttf"),
     [fonts.BOLD]: require("./src/assets/fonts/AsapSharp_Condensed-Bold.ttf"),
   });
+
+  useEffect(() => {
+    dbManager.initDB();
+  }, []);
 
   if (!fontsLoaded) {
     return (

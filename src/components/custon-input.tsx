@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { StyleSheet, View, TextInput } from "react-native";
 import { fonts, colors } from "../constants/themes";
 
 export default function CustonInput() {
+  const [text, setText] = useState("");
+
   return (
     <View style={styles.container}>
-      <TextInput></TextInput>
+      <TextInput onChangeText={(value) => setText(value)} value={text} />
     </View>
   );
 }

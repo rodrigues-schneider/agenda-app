@@ -42,20 +42,20 @@ export class dbManager {
   static async getAllTasks() {
     const db = await this.openDB();
 
-    return await db.getAllAsync<Task>(`SELECT * FROM tasks;`);
+    return await db.getAllAsync(`SELECT * FROM tasks;`);
   }
 
   static async getTask(id: string) {
     const db = await this.openDB();
 
-    return await db.getAllAsync<Task>(`SELECT * FROM tasks WHERE id = ?;`, id);
+    return await db.getAllAsync(`SELECT * FROM tasks WHERE id = ?;`, id);
   }
 
   static async insertCategory(taskId: string, category: string) {
     const db = await this.openDB();
     const result = await db.runAsync(
       `
-        UPDATE tasks SET category = ? WHERE name = ?;
+        UPDATE tasks SET category = ? WHERE id = ?;
         `,
       category,
       taskId,
@@ -66,7 +66,7 @@ export class dbManager {
     const db = await this.openDB();
     const result = await db.runAsync(
       `
-        UPDATE tasks SET description = ? WHERE name = ?;
+        UPDATE tasks SET description = ? WHERE id = ?;
         `,
       description,
       taskId,
@@ -77,24 +77,23 @@ export class dbManager {
     const db = await this.openDB();
     const result = await db.runAsync(
       `
-        UPDATE tasks SET local = ? WHERE name = ?;
+        UPDATE tasks SET local = ? WHERE id = ?;
         `,
       local,
       taskId,
     );
   }
 
-  static async getCategories() {
-    const db = await this.getAllTasks();
+  static async getCategories(): Promise<string[]> {
+    const tasks = (await this.getAllTasks()) as any[];
 
-    let categoryList: string[] = [];
+    let categorySet = new Set<string>();
 
-    db.forEach((item) => {
-      let i = item.getCategory();
-      if (i) {
-        categoryList.push(i);
+    tasks.forEach((item) => {
+      if (item.category) {
+        categorySet.add(item.category);
       }
     });
-    return categoryList;
+    return Array.from(categorySet);
   }
 }

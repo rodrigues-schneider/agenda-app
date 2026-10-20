@@ -3,12 +3,13 @@ import { fonts, colors } from "../constants/themes";
 
 type CustonButtonProps = {
   text: string;
+  textColor?: string;
 };
 
-export default function CustonButton({ text }: CustonButtonProps) {
+export default function CustonButton({ text, textColor }: CustonButtonProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{text}</Text>
+      <Text style={[styles.text, { color: textColor }]}>{text}</Text>
     </View>
   );
 }
@@ -28,5 +29,6 @@ const styles = StyleSheet.create({
 
   text: {
     fontFamily: fonts.MEDIUM,
+    color: colors.Background,
   },
 });

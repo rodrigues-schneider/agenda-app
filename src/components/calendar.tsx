@@ -48,7 +48,8 @@ LocaleConfig.locales["pt-br"] = {
 LocaleConfig.defaultLocale = "pt-br";
 
 export default function Calender() {
-  const formatedToday = new Date().toISOString().split("T")[0];
+  const today = new Date();
+  const formatedToday = today.toISOString().split("T")[0];
 
   const [selectedDate, setSelectedDate] = useState(formatedToday);
 

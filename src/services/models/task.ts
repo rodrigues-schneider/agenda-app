@@ -1,13 +1,48 @@
 export class Task {
+  private name: string;
+  private date: string;
+  private hour: string;
+  private category?: string;
+  private description?: string;
+  private local?: string;
 
-    name: string
-    category: string
-    description: string
+  constructor(name: string, date: string, hour: string) {
+    this.name = name;
+    this.date = date;
+    this.hour = hour;
+  }
 
-    constructor (name: string, category: string, description: string){
-        this.name = name;
-        this.category = category;
-        this.description = description;
-    }
-    
+  setCategory(category: string) {
+    this.category = category;
+  }
+
+  setDescription(description: string) {
+    this.description = description;
+  }
+
+  setLocal(local: string) {
+    this.local = local;
+  }
+
+  getName() {
+    return this.name;
+  }
+  getDate() {
+    return this.date;
+  }
+  getHour() {
+    return this.hour;
+  }
+
+  getCategory() {
+    return this.category;
+  }
+
+  getDescription() {
+    return this.description;
+  }
+
+  getLocal() {
+    return this.local;
+  }
 }
