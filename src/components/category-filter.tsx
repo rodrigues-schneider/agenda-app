@@ -2,19 +2,11 @@ import { StyleSheet, Text, FlatList, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 
 import { colors, fonts } from "../constants/themes";
-import { dbManager } from "../services";
+import { DbManager } from "../services";
 
 export default function CategoryFilter() {
   const [selected, setSelected] = useState("Todas");
   const [categories, setCategories] = useState<string[]>([]);
-
-  useEffect(() => {
-    async function loadCategories() {
-      const fetchCategories = await dbManager.getCategories();
-      setCategories(["Todas", ...fetchCategories]);
-    }
-    loadCategories();
-  }, []);
 
   return (
     <FlatList
@@ -41,6 +33,9 @@ export default function CategoryFilter() {
 
 const styles = StyleSheet.create({
   container: {
+    height: "8%",
+    width: "auto",
+
     borderRadius: 20,
     borderColor: colors.Secondary,
     borderWidth: 1,

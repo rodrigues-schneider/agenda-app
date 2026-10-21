@@ -1,11 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { fonts, colors } from "./src/constants/themes";
-import { dbManager } from "./src/services";
+import { DbManager, Task } from "./src/services";
 
 import { Routes } from "./src/routes/";
 
@@ -17,9 +17,20 @@ export default function App() {
     [fonts.BOLD]: require("./src/assets/fonts/AsapSharp_Condensed-Bold.ttf"),
   });
 
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [dates, setDates] = useState<string[]>([]);
+
   useEffect(() => {
-    dbManager.initDB();
+    initializeAndLoadDB();
   }, []);
+
+  async function initializeAndLoadDB() {
+    const db = await DbManager.initDB();
+    setTasks(db.getAllTasks());
+    setCategories(db.getAllCategories());
+    setDates(db.getAllDates());
+  }
 
   if (!fontsLoaded) {
     return (
