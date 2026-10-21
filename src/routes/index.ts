@@ -1,1 +1,1 @@
-export {default as Routes} from './botton-tabs-routes.routes'
+export { default as Routes } from "./project.routes";

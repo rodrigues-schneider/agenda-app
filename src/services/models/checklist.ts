@@ -5,4 +5,5 @@ export interface Checklist {
   local?: string;
 }
 
+//Objeto para enviar dados para o database
 export type CreateChecklistDTO = Omit<Checklist, "id">;

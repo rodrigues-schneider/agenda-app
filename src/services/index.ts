@@ -1,3 +1,6 @@
 export * from "./database/dbManager";
-export { Task } from "./models/task";
-export { Checklist } from "./models/checklist";
+export * from "./models/task";
+export * from "./models/checklist";
+export * from "./models/category";
+export * from "./models/date";
+export * from "./models/place";
