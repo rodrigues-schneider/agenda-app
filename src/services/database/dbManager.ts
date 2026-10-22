@@ -1,13 +1,14 @@
 import * as SQLite from "expo-sqlite";
-import { Task, Category, Date, Place } from "../";
+import { PlannerTask, TaskCategory, Place } from "../";
+import { FontAwesomeIconName } from "@react-native-vector-icons/fontawesome";
 
 export class DbManager {
   private static instance: DbManager | null = null;
   private db: SQLite.SQLiteDatabase | null = null;
 
-  private taskList: Task[] = [];
-  private categoryList: Category[] = [];
-  private dateList: Date[] = [];
+  private taskList: PlannerTask[] = [];
+  private categoryList: TaskCategory[] = [];
+  private dateList: string[] = [];
   private placeList: Place[] = [];
 
   //Estrutura singleton: construtor privado e instancia única
@@ -33,14 +34,15 @@ export class DbManager {
 
       CREATE TABLE IF NOT EXISTS task_categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category TEXT UNIQUE NOT NULL 
-        color TEXT UNIQUE NOT NULL
+        category_name TEXT UNIQUE NOT NULL,
+        category_color TEXT,
+        category_icon TEXT
       );
 
       CREATE TABLE IF NOT EXISTS task_places (
-        id INTEGER PRIMARY KEY AUTOINCREMENT
-        place TEXT UNIQUE NOT NULL
-      )      
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        place_name TEXT UNIQUE NOT NULL
+      );
 
       CREATE TABLE IF NOT EXISTS tasks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,8 +52,9 @@ export class DbManager {
         category TEXT,
         description TEXT,
         place TEXT,
-        FOREIGN KEY (category) REFERENCES task_categories (category) ON DELETE SET NULL,
-        FOREIGN KEY (place) REFERENCES task_places (place) ON DELETE SET NULL
+        completed INTEGER NOT NULL DEFAULT 0 CHECK (completed IN (0 , 1)),
+        FOREIGN KEY (category) REFERENCES task_categories (category_name) ON DELETE SET NULL ON UPDATE CASCADE,
+        FOREIGN KEY (place) REFERENCES task_places (place_name) ON DELETE SET NULL
 
       );            
       `);
@@ -63,9 +66,16 @@ export class DbManager {
   public async refreshLists() {
     if (!this.db) return;
 
-    this.taskList = await this.db.getAllAsync<Task>(`SELECT * FROM tasks`);
+    const allTasks = await this.db.getAllAsync<
+      Omit<PlannerTask, "completed"> & { completed: number }
+    >(`SELECT * FROM tasks`);
 
-    this.categoryList = await this.db.getAllAsync<Category>(
+    this.taskList = allTasks.map((task) => ({
+      ...task,
+      completed: task.completed === 1,
+    }));
+
+    this.categoryList = await this.db.getAllAsync<TaskCategory>(
       `SELECT * FROM task_categories`,
     );
 
@@ -73,10 +83,14 @@ export class DbManager {
       `SELECT * FROM task_places`,
     );
 
-    this.dateList = await this.db.getAllAsync<Date>(
+    const dates = await this.db.getAllAsync<{ date: string }>(
       `SELECT DISTINCT date FROM tasks WHERE date IS NOT NULL;`,
     );
+
+    this.dateList = dates.map((d) => d.date);
   }
+
+  //-----Setters----//
 
   //Guarda uma nova task no DB
   public async insertNewTask(name: string, date: string, hour: string) {
@@ -96,28 +110,80 @@ export class DbManager {
   }
 
   //Adiciona uma categoria à uma Task e à tabela de categorias, se não existir nela
-  public async insertCategory(taskId: string, category: string) {
+  public async setCategory(
+    taskId: number,
+    newCategory: string,
+    categoryColor?: string,
+    categoryIcon?: FontAwesomeIconName,
+  ) {
     if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    const color = categoryColor ?? "#000000";
 
     await this.db.runAsync(
       `
-      INSERT OR IGNORE INTO task_categories (category) VALUES (?);
+      INSERT OR IGNORE INTO task_categories (category_name, category_color, category_icon) VALUES (?, ?, ?);
       `,
-      category,
+      newCategory,
+      color,
+      categoryIcon ?? null,
     );
 
     await this.db.runAsync(
       `
         UPDATE tasks SET category = ? WHERE id = ?;
         `,
-      category,
+      newCategory,
       taskId,
     );
     await this.refreshLists();
   }
 
-  //Adiciona uma descrição à uma Task
-  public async insertDescription(taskId: string, description: string) {
+  public async setCategoryColor(categoryId: number, newColor: string) {
+    if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      UPDATE task_categories SET category_color = ? WHERE id = ?;
+      `,
+      newColor,
+      categoryId,
+    );
+    await this.refreshLists();
+  }
+
+  public async setCategoryIcon(
+    categoryId: number,
+    newIcon: FontAwesomeIconName,
+  ) {
+    if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      UPDATE task_categories SET category_icon = ? WHERE id = ?;
+      
+      `,
+      newIcon,
+      categoryId,
+    );
+    await this.refreshLists();
+  }
+
+  public async setCategoryName(categoryId: number, newName: string) {
+    if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      UPDATE task_categories SET category_name = ? WHERE id = ?;`,
+      newName,
+      categoryId,
+    );
+
+    await this.refreshLists();
+  }
+
+  //Adiciona ou atualiza a descrição de uma Task
+  public async setDescription(taskId: number, description: string) {
     if (!this.db) throw new Error("Base de dados não inicializada.");
 
     await this.db.runAsync(
@@ -131,8 +197,15 @@ export class DbManager {
   }
 
   //Associa um local a uma Task
-  public async insertPlace(taskId: string, place: string) {
+  public async setPlace(taskId: number, place: string) {
     if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      INSERT OR IGNORE INTO task_places (place_name) VALUES (?);
+      `,
+      place,
+    );
 
     await this.db.runAsync(
       `
@@ -144,23 +217,74 @@ export class DbManager {
     await this.refreshLists();
   }
 
-  public getAllTasks(): Task[] {
-    return this.taskList;
+  public async setTaskName(taskId: number, newName: string) {
+    if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      UPDATE tasks SET name = ? WHERE id = ?;      
+      `,
+      newName,
+      taskId,
+    );
+    await this.refreshLists();
   }
 
-  public getTask(id: number): Task | undefined {
+  public async setTaskDate(taskId: number, newDate: string) {
+    if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      UPDATE tasks SET date = ? WHERE id = ?;`,
+      newDate,
+      taskId,
+    );
+    await this.refreshLists();
+  }
+
+  public async setTaskHour(taskId: number, newHour: string) {
+    if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      UPDATE tasks SET hour = ? WHERE id = ?;`,
+      newHour,
+      taskId,
+    );
+    await this.refreshLists();
+  }
+
+  public async setTaskCompleted(taskId: number, completed: boolean) {
+    if (!this.db) throw new Error("Base de dados não inicializada.");
+
+    await this.db.runAsync(
+      `
+      UPDATE tasks SET completed = ? WHERE id = ?;`,
+      completed ? 1 : 0,
+      taskId,
+    );
+    await this.refreshLists();
+  }
+
+  //-----Getters-----//
+
+  public getAllTasks(): PlannerTask[] {
+    return [...this.taskList];
+  }
+
+  public getTask(id: number): PlannerTask | undefined {
     return this.taskList.find((task) => task.id === id);
   }
 
-  public getAllCategories(): Category[] {
-    return this.categoryList;
+  public getAllCategories(): TaskCategory[] {
+    return [...this.categoryList];
   }
 
-  public getAllDates(): Date[] {
-    return this.dateList;
+  public getAllDates(): string[] {
+    return [...this.dateList];
   }
 
   public getAllPlaces(): Place[] {
-    return this.placeList;
+    return [...this.placeList];
   }
 }

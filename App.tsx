@@ -1,14 +1,13 @@
-import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { fonts, colors } from "./src/constants/themes";
-import { DbManager, Task } from "./src/services";
+import { usePlannerData, PlannerContextProvider } from "./src/contexts";
 
 import { Routes } from "./src/routes/";
 
-export default function App() {
+function AppContent() {
   //Carrega as Fontes
   const [fontsLoaded] = useFonts({
     [fonts.LIGHT]: require("./src/assets/fonts/AsapSharp_Condensed-Light.ttf"),
@@ -16,6 +15,8 @@ export default function App() {
     [fonts.SEMIBOLD]: require("./src/assets/fonts/AsapSharp_Condensed-SemiBold.ttf"),
     [fonts.BOLD]: require("./src/assets/fonts/AsapSharp_Condensed-Bold.ttf"),
   });
+
+  const { dbLoaded } = usePlannerData();
 
   if (!fontsLoaded || !dbLoaded) {
     return (
@@ -30,5 +31,13 @@ export default function App() {
       <StatusBar style="auto" />
       <Routes />
     </SafeAreaProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <PlannerContextProvider>
+      <AppContent />
+    </PlannerContextProvider>
   );
 }

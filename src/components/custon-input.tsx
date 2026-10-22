@@ -1,13 +1,38 @@
 import { useState } from "react";
-import { StyleSheet, View, TextInput } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Text,
+  TextInputProps,
+} from "react-native";
 import { fonts, colors } from "../constants/themes";
 
-export default function CustonInput() {
+type CustonInputProp = TextInputProps & {
+  label: string;
+};
+
+export default function CustonInput({ label }: CustonInputProp) {
   const [text, setText] = useState("");
+  const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.container}>
-      <TextInput onChangeText={(value) => setText(value)} value={text} />
+      <Text style={styles.text}>{label}</Text>
+      <View
+        style={[
+          styles.textInputContainer,
+          { borderColor: focused ? colors.Primary : colors.Border },
+        ]}
+      >
+        <TextInput
+          style={styles.textInput}
+          onChangeText={(value) => setText(value)}
+          value={text}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+      </View>
     </View>
   );
 }
@@ -15,13 +40,30 @@ export default function CustonInput() {
 const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
-    alignItems: "center",
     width: "70%",
-    height: "12%",
-    borderRadius: "5%",
-    borderColor: colors.Border,
-    shadowColor: colors.Foreground,
+    height: "10%",
+    marginVertical: 10,
+  },
+  text: {
+    fontFamily: fonts.MEDIUM,
+    fontSize: 16,
+    color: colors.Secondary,
+    paddingHorizontal: 15,
+    marginBottom: 5,
+  },
+
+  textInputContainer: {
+    borderRadius: 10,
+    borderWidth: 1,
+
+    backgroundColor: colors.Background,
+    shadowColor: colors.Accent,
     shadowOffset: { width: 2, height: 2 },
     elevation: 5,
+  },
+  textInput: {
+    width: 350,
+    height: 50,
+    paddingHorizontal: 20,
   },
 });

@@ -24,8 +24,9 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",
-    gap: 2,
-    margin: 10,
+    width: "100%",
+    gap: 5,
+    padding: 20,
   },
   title: {
     fontFamily: fonts.SEMIBOLD,

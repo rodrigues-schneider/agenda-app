@@ -1,6 +1,6 @@
 export interface Place {
   id: number | null;
-  name: string;
+  place_name: string;
 }
 
 //Objeto para enviar dados para o database

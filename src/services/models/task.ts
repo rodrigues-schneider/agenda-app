@@ -1,4 +1,4 @@
-export interface Task {
+export interface PlannerTask {
   id: number | null;
   name: string;
   date: string | null;
@@ -6,7 +6,8 @@ export interface Task {
   category?: string | null;
   description?: string | null;
   place?: string | null;
+  completed?: boolean;
 }
 
 //Objeto para enviar dados para o database
-export type CreateTaskDTO = Omit<Task, "id">;
+export type CreatePlannerTaskDTO = Omit<PlannerTask, "id">;

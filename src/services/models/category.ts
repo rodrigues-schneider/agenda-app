@@ -1,8 +1,10 @@
-export interface Category {
+import { FontAwesomeIconName } from "@react-native-vector-icons/fontawesome";
+export interface TaskCategory {
   id: number | null;
-  name: string;
-  color: string;
+  category_name: string;
+  category_color?: string | null;
+  category_icon?: FontAwesomeIconName | null;
 }
 
 //Objeto para enviar dados para o database
-export type CreateCategoryDTO = Omit<Category, "id">;
+export type CreateTaskCategoryDTO = Omit<TaskCategory, "id">;
