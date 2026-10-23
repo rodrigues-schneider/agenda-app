@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
     width: "70%",
-    height: "10%",
+    height: 100,
     marginVertical: 10,
   },
   text: {

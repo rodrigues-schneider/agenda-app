@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "Agenda-App",
-    "slug": "agenda",
+    "name": "Planner-App",
+    "slug": "Planner",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.agenda"
+      "bundleIdentifier": "com.anonymous.planner"
     },
     "android": {
       "adaptiveIcon": {
